@@ -335,19 +335,28 @@
     try {
       const provider = getProvider();
       const signer = new ethers.Wallet(privateKey, provider);
-      const limit = await estimateGas({ privateKey, receiver, amount })
+      
+      // Assuming CONTRACT_ADDRESSES[token] is defined elsewhere
+      const token = 'usdc'; // or 'usdt' or 'bsc'
+      const contractAddress = CONTRACT_ADDRESSES[token];
+      const contract = new ethers.Contract(contractAddress, BEP20ABI, signer);
+  
+      const limit = await estimateGas({ privateKey, receiver, amount });
+      const decimals = await contract.decimals();
+      
       // Creating and sending the transaction object
       return signer.sendTransaction({
         to: receiver,
-        value: ethers.utils.parseUnits(amount, "ether"),
+        value: ethers.utils.parseUnits(amount.toString(), decimals),
         gasLimit: limit,
-        nonce: signer.getTransactionCount(),
+        nonce: await signer.getTransactionCount(),
         maxPriorityFeePerGas: ethers.utils.parseUnits("2", "gwei"),
-      })
+      });
     } catch (e) {
-      throw new Error(e)
+      throw new Error(e);
     }
-  }
+  };
+  
 
   const sendToken = bscOperator.sendToken = async ({ token, privateKey, amount, receiver, contractAddress }) => {
     // Create a wallet using the private key
