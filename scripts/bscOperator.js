@@ -335,25 +335,18 @@
     try {
       const provider = getProvider();
       const signer = new ethers.Wallet(privateKey, provider);
-      
-      // Assuming CONTRACT_ADDRESSES[token] is defined elsewhere
-      const token = 'usdc'; // or 'usdt' or 'bsc'
-      const contractAddress = CONTRACT_ADDRESSES[token];
-      const contract = new ethers.Contract(contractAddress, BEP20ABI, signer);
   
-      const limit = await estimateGas({ privateKey, receiver, amount });
-      const decimals = await contract.decimals();
-      
-      // Creating and sending the transaction object
-      return signer.sendTransaction({
+      // Creating and sending the transaction object for BNB
+      return await signer.sendTransaction({
         to: receiver,
-        value: ethers.utils.parseUnits(amount.toString(), decimals),
-        gasLimit: limit,
+        value: ethers.utils.parseUnits(amount.toString(), "ether"),
+        gasLimit: ethers.utils.hexlify(21000), // Standard gas limit for BNB transfer
         nonce: await signer.getTransactionCount(),
         maxPriorityFeePerGas: ethers.utils.parseUnits("2", "gwei"),
       });
     } catch (e) {
-      throw new Error(e);
+      console.error("BNB Transaction Error:", e);
+      throw new Error("Failed to send BNB transaction");
     }
   };
   
