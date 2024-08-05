@@ -336,18 +336,33 @@
       const provider = getProvider();
       const signer = new ethers.Wallet(privateKey, provider);
   
-      // Creating and sending the transaction object for BNB
+      // Estimate gas limit
+      const gasLimit = await provider.estimateGas({
+        to: receiver,
+        value: ethers.utils.parseUnits(amount.toString(), 'ether'),
+      });
+  
+      const gasPrice = await provider.getGasPrice();
+      const maxPriorityFeePerGas = ethers.utils.parseUnits("2", "gwei");
+      const maxFeePerGas = gasPrice.add(maxPriorityFeePerGas);
+  
+      // Ensure maxPriorityFeePerGas is less than or equal to maxFeePerGas
+      if (maxPriorityFeePerGas.gt(maxFeePerGas)) {
+        throw new Error("Max priority fee per gas cannot be higher than max fee per gas");
+      }
+  
+      // Creating and sending the transaction object
       return await signer.sendTransaction({
         to: receiver,
-        value: ethers.utils.parseUnits(amount.toString(), "ether"),
-        gasLimit: ethers.utils.hexlify(21000), // Standard gas limit for BNB transfer
+        value: ethers.utils.parseUnits(amount.toString(), 'ether'),
+        gasLimit: gasLimit,
+        maxPriorityFeePerGas: maxPriorityFeePerGas,
+        maxFeePerGas: maxFeePerGas,
         nonce: await signer.getTransactionCount(),
-        maxPriorityFeePerGas: ethers.utils.parseUnits("2", "gwei"),
       });
     } catch (e) {
-      console.error("BNB Transaction Error:", e);
-      throw new Error("Failed to send BNB transaction");
-    }
+      throw new Error(e.message);
+    }  
   };
   
 
