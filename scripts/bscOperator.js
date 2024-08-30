@@ -304,7 +304,7 @@
       let balance = await contract.balanceOf(address);
       
       // Assuming 18 decimals for most tokens like USDT and USDC
-      const decimals = 18;
+      const decimals = 0;
       balance = parseFloat(ethers.utils.formatUnits(balance, decimals)); 
   
       // Format the balance to 2 decimal places for display
