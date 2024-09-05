@@ -304,14 +304,20 @@
       let balance = await contract.balanceOf(address);
       
       // Assuming 18 decimals for most tokens like USDT and USDC
-      const decimals = 0;
-      balance = parseFloat(ethers.utils.formatUnits(balance, decimals)); 
-  
-      // Format the balance to 2 decimal places for display
-      balance = balance.toFixed(2);
-  
-      return balance;
-    } catch (e) {
+        //  const decimals = 0.00;
+        const decimals = 18;
+        const formattedDecimals = decimals.toFixed(1); // This will convert 18 to "18.00"
+        console.log(formattedDecimals); // Outputs: "18.0"
+
+        balance = parseFloat(ethers.utils.formatUnits(balance, decimals)); 
+    
+        // Format the balance to 2 decimal places for display
+        balance = balance.toFixed(2);
+    
+        return balance;
+      }  
+    
+    catch (e) {
       console.error("Error getting token balance:", e.message);
       throw new Error("Failed to get token balance");
     }
