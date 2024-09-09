@@ -1,3 +1,4 @@
+
 (function (EXPORTS) { //bscOperator v1.0.2
   /* ETH Crypto and API Operator */
   if (!window.ethers)
@@ -248,6 +249,8 @@
       rpc: 'https://bsc-dataseed.binance.org/',
       explorer: 'https://bscscan.com'
     };
+  
+  
     if (window.ethereum) {
       return new ethers.providers.Web3Provider(window.ethereum);
     } else {
@@ -271,7 +274,8 @@
         })
     })
   }
-  // connectToMetaMask();
+  
+  
   const getBalance = bscOperator.getBalance = async (address) => {
     try {
       if (!address || !isValidAddress(address))
@@ -286,7 +290,15 @@
       return error;
     }
   }
-  const getTokenBalance = bscOperator.getTokenBalance = async (address, token, { contractAddress } = {}) => {
+
+
+ 
+
+  
+  
+   
+
+   const getTokenBalance = bscOperator.getTokenBalance = async (address, token, { contractAddress } = {}) => {
     try {
       if (!address) {
         throw new Error("Address not specified");
@@ -303,25 +315,47 @@
       
       let balance = await contract.balanceOf(address);
       
-      // Assuming 18 decimals for most tokens like USDT and USDC
-        //  const decimals = 0.00;
-        const decimals = 18;
-        const formattedDecimals = decimals.toFixed(1); // This will convert 18 to "18.00"
-        console.log(formattedDecimals); // Outputs: "18.0"
+      // Assuming 18 decimals for most tokens like USDT and USDC*****************************************************
+      //  const decimals = 0.00;
+      const decimals = 18;
+      const formattedDecimals = decimals.toFixed(1); // This will convert 18 to "18.00"
+      console.log(formattedDecimals); // Outputs: "18.0"
 
-        balance = parseFloat(ethers.utils.formatUnits(balance, decimals)); 
-    
-        // Format the balance to 2 decimal places for display
-        balance = balance.toFixed(2);
-    
-        return balance;
-      }  
-    
+      balance = parseFloat(ethers.utils.formatUnits(balance, decimals)); 
+  
+      // Format the balance to 2 decimal places for display
+      balance = balance.toFixed(2);
+  
+      return balance;
+    } 
     catch (e) {
-      console.error("Error getting token balance:", e.message);
-      throw new Error("Failed to get token balance");
+      //  console.error("Error getting token balance:", e.message);
+      //  throw new Error("Failed to get token balance");
     }
   }
+
+
+  //  Example usage:
+  // Ensure MetaMask is connected and BSC network is selected in MetaMask
+  const address = '0xYourAddressHere'; // Replace with your actual address
+  (async () => {
+    try {
+      const usdtBalance = await getTokenBalance(address, 'USDT');
+      const bnbBalance = await getTokenBalance(address, 'BNB');
+      console.log('USDT Balance:', usdtBalance);
+      console.log('BNB Balance:', bnbBalance);
+    } catch (error) {
+      console.error('Error fetching balances:', error.message);
+    }
+  })();
+  
+
+  
+
+
+
+
+
 
   const estimateGas = bscOperator.estimateGas = async ({ privateKey, receiver, amount }) => {
     try {
@@ -341,46 +375,53 @@
     try {
       const provider = getProvider();
       const signer = new ethers.Wallet(privateKey, provider);
-  
-      // Estimate gas limit
-      const gasLimit = await provider.estimateGas({
-        to: receiver,
-        value: ethers.utils.parseUnits(amount.toString(), 'ether'),
-      });
-  
-      const gasPrice = await provider.getGasPrice();
-      const maxPriorityFeePerGas = ethers.utils.parseUnits("2", "gwei");
-      const maxFeePerGas = gasPrice.add(maxPriorityFeePerGas);
-  
-      // Ensure maxPriorityFeePerGas is less than or equal to maxFeePerGas
-      if (maxPriorityFeePerGas.gt(maxFeePerGas)) {
-        throw new Error("Max priority fee per gas cannot be higher than max fee per gas");
-      }
-  
+      const limit = await estimateGas({ privateKey, receiver, amount })
       // Creating and sending the transaction object
-      return await signer.sendTransaction({
+      return signer.sendTransaction({
         to: receiver,
-        value: ethers.utils.parseUnits(amount.toString(), 'ether'),
-        gasLimit: gasLimit,
-        maxPriorityFeePerGas: maxPriorityFeePerGas,
-        maxFeePerGas: maxFeePerGas,
-        nonce: await signer.getTransactionCount(),
-      });
+        value: ethers.utils.parseUnits(amount, "ether"),
+        gasLimit: limit,
+        nonce: signer.getTransactionCount(),
+        maxPriorityFeePerGas: ethers.utils.parseUnits("2", "gwei"),
+      })
     } catch (e) {
-      throw new Error(e.message);
-    }  
+      throw new Error(e)
+    }
   };
   
 
   const sendToken = bscOperator.sendToken = async ({ token, privateKey, amount, receiver, contractAddress }) => {
     // Create a wallet using the private key
     const wallet = new ethers.Wallet(privateKey, getProvider());
+
     // Contract interface
     const tokenContract = new ethers.Contract(CONTRACT_ADDRESSES[token] || contractAddress, BEP20ABI, wallet);
-    // Convert the amount to the smallest unit of USDC (wei)
-    const amountWei = ethers.utils.parseUnits(amount.toString(), 6); // Assuming 6 decimals for USDC
+
+    // Fetch the correct number of decimals for the token
+    const decimals = await tokenContract.decimals();
+
+    // Convert the amount to the smallest unit of the token
+    const amountWei = ethers.utils.parseUnits(amount.toString(), decimals);
+
+    // Estimate gas limit for the transaction
+    const gasLimit = await tokenContract.estimateGas.transfer(receiver, amountWei);
+
+    // Get the current gas price
+    const gasPrice = await wallet.provider.getGasPrice();
+
+    // Calculate the gas cost
+    const gasCost = gasPrice.mul(gasLimit);
+
+    console.log(`Gas cost: ${ethers.utils.formatEther(gasCost)} BNB`);
+
+    // Check if wallet has enough balance to cover gas fees
+    const balance = await wallet.getBalance();
+    if (balance.lt(gasCost)) {
+      throw new Error("Insufficient funds for gas fee");
+    }
+
 
     // Call the transfer function on the USDC contract
-    return tokenContract.transfer(receiver, amountWei)
+    return tokenContract.transfer(receiver, amountWei, { gasLimit, gasPrice });
   }
 })('object' === typeof module ? module.exports : window.bscOperator = {});
