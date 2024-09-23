@@ -130,6 +130,10 @@ button:not(:disabled),
   color: rgba(var(--background-color), 1);
   background-color: var(--accent-color);
 }
+.ok-button {
+  padding: 9px 10px;
+  width: 60px;
+ }
 .button--primary .icon {
   fill: rgba(var(--background-color), 1);
 }
