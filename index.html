@@ -772,7 +772,7 @@
           // setMetaMaskStatus(window.ethereum.isConnected())
           window.ethereum.on("chainChanged", (chainId) => {
             window.currentChainId = chainId;
-            if (chainId !== "0x1") {
+            if (chainId !== "0x38") {
               renderError("Please switch MetaMask to Binance Mainnet");
             } else {
               router.routeTo(location.hash);
@@ -930,7 +930,7 @@
         );
         if (
           window.ethereum &&
-          !(window.currentChainId && window.currentChainId === "0x1")
+          !(window.currentChainId && window.currentChainId === "0x38")
         ) {
           renderError("Please switch MetaMask to Binance Mainnet");
         }
@@ -1478,7 +1478,7 @@
         );
         if (
           window.ethereum &&
-          !(window.currentChainId && window.currentChainId === "0x1")
+          !(window.currentChainId && window.currentChainId === "0x38")
         ) {
           renderError("Please switch MetaMask to Binance Mainnet");
         }
