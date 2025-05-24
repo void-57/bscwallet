@@ -2853,7 +2853,6 @@
 
  
       function togglePrivateKeyVisibility(input) {
-        console.log(input)
   const target = input.closest("sm-input");
   // const checkBalanceButton = document.querySelector("#check_balance_button");
         console.log(target)
@@ -2977,7 +2976,6 @@
           });
       }
       function handleSenderInput(e) {
-        console.log(e.target.isValid)
         getRef("check_balance_button").disabled = false;
         if (!e.target.isValid) {
           // getRef("sender_balance_container").classList.add("hidden");
