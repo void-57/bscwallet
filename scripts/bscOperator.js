@@ -274,6 +274,72 @@
         })
     })
   }
+  const getTransactionHistory = (bscOperator.getTransactionHistory = async (
+    address
+  ) => {
+    try {
+      if (!address || !isValidAddress(address))
+        return new Error("Invalid address");
+      const url = `https://api.bscscan.com/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&sort=desc&apikey=N7BFDPT7X927YVKWW4XT7VWI6RP2CH38RR`;
+
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data.status === "1") {
+        return data.result.map((tx) => ({
+          hash: tx.hash,
+          from: tx.from,
+          to: tx.to,
+          value: tx.value,
+          timeStamp: tx.timeStamp,
+          blockNumber: tx.blockNumber,
+          confirmations: tx.confirmations || 0,
+          gasPrice: tx.gasPrice,
+          gasUsed: tx.gasUsed,
+        }));
+      } else {
+        console.error("Error fetching transaction history:", data.message);
+        return [];
+      }
+    } catch (error) {
+      console.error("Error:", error.message);
+      return error;
+    }
+  });
+
+  const getTransactionDetails = (bscOperator.getTransactionDetails = async (
+    txHash
+  ) => {
+    try {
+      if (!txHash || !/^0x([A-Fa-f0-9]{64})$/.test(txHash)) return null;
+      const provider = getProvider();
+      const tx = await provider.getTransaction(txHash);
+
+      if (!tx) return null;
+      const receipt = await provider.getTransactionReceipt(txHash);
+
+      let timestamp = null;
+      if (tx.blockNumber) {
+        const block = await provider.getBlock(tx.blockNumber);
+        timestamp = block.timestamp;
+      }
+
+      return {
+        hash: tx.hash,
+        from: tx.from,
+        to: tx.to,
+        value: tx.value,
+        gasPrice: tx.gasPrice,
+        gasUsed: receipt ? receipt.gasUsed : null,
+        blockNumber: tx.blockNumber,
+        timeStamp: timestamp,
+        status: receipt ? (receipt.status ? "success" : "failed") : "pending",
+      };
+    } catch (error) {
+      console.error("Error fetching transaction details:", error);
+      return null;
+    }
+  });
   
   
   const getBalance = bscOperator.getBalance = async (address) => {
