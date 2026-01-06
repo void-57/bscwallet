@@ -1,11 +1,11 @@
-   
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Binance Smart Chain</title>
-    <link rel="stylesheet" href="css/main.min.css" />
+    <link rel="stylesheet" href="css/main.css" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -21,7 +21,9 @@
       <p id="confirm_message" class="breakable"></p>
       <div class="flex align-center gap-0-5 margin-left-auto">
         <button class="button cancel-button">Cancel</button>
-        <button class="button button--primary confirm-button ok-button">Ok</button>
+        <button class="button button--primary confirm-button ok-button">
+          Ok
+        </button>
       </div>
     </sm-popup>
     <main>
@@ -260,17 +262,13 @@
       </header>
       <section class="grid gap-1-5">
         <div class="grid gap-0-5">
-          <h4>Did you forget your Binance Address?</h4>
+          <h4>Did you forget your addresses?</h4>
           <p>
-            If you have your BSC/BTC/FLO Private Key, enter it here and recover
-            your Binance Address.
+            If you have your BSC/BTC/FLO Private Key, enter it here to recover
+            all your addresses and private keys.
           </p>
         </div>
         <sm-form>
-          <div id="recovered_btc_addr_wrapper" class="hidden">
-            <h5>Recovered Binance Address</h5>
-            <sm-copy id="recovered_btc_addr"></sm-copy>
-          </div>
           <sm-input
             id="retrieve_btc_addr_field"
             type="password"
@@ -329,6 +327,7 @@
             Recover
           </button>
         </sm-form>
+        <div id="recovered_addresses_wrapper" class="grid gap-1"></div>
       </section>
     </sm-popup>
     <script>
@@ -346,7 +345,7 @@
       type="text/javascript"
     ></script>
 
-    <!-- ethers.js version 5.6 -->
+    <!-- ethers.js version 5.6 -->
 
     <script src="scripts/btcOperator.js" type="text/javascript"></script>
     <script src="scripts/floCrypto.js" type="text/javascript"></script>
@@ -354,13 +353,11 @@
     <script src="scripts/keccak.js" type="text/javascript"></script>
     <script src="scripts/floEthereum.js" type="text/javascript"></script>
     <script src="scripts/compactIDB.js" type="text/javascript"></script>
-    <script
-      src="scripts/ether.umd.min.js"
-      type="text/javascript"
-    ></script>
+    <script src="scripts/ether.umd.min.js" type="text/javascript"></script>
     <script src="scripts/bscOperator.js" type="text/javascript"></script>
+
     <script>
-       let showCurrentValue = false;
+      let showCurrentValue = false;
       let currentCurrency = localStorage.getItem("preferredCurrency") || "bsc";
       let exchangeRates = {
         usd: 0,
@@ -615,6 +612,7 @@
           }
         }
       }
+
       const uiGlobals = {};
       const { html, svg, render: renderElem } = uhtml;
       uiGlobals.connectionErrorNotification = [];
@@ -640,7 +638,7 @@
         });
         notify("We are back online.", "success");
       });
-      
+      // Use instead of document.getElementById
       function getRef(elementId) {
         return document.getElementById(elementId);
       }
@@ -982,9 +980,7 @@
         routingEnd(state) {
           let { page } = state;
           if (!page) page = "balance";
-          if (page !== "send") {
-            taprootScriptTxDetails = {};
-          }
+
           const previousTarget =
             getRef("main_navbar").querySelector(".nav-item--active");
           if (previousTarget) {
@@ -1003,7 +999,7 @@
               target.append(html.node`<div class="nav-item__indicator"></div>`);
             }
           }
-        }
+        },
       });
       function setMetaMaskStatus(isConnected) {
         if (isConnected) {
@@ -1033,13 +1029,12 @@
             createRipple(e, e.target.closest("button, .interactive"));
           }
         });
+
         compactIDB
           .initDB("floBinance", {
             contacts: {},
           })
-          .then((result) => {
-            console.log(result);
-          })
+          .then((result) => {})
           .catch((error) => {
             console.error(error);
           });
@@ -1114,7 +1109,7 @@
 
       class LazyLoader {
         constructor(container, elementsToRender, renderFn, options = {}) {
-          const { pageSize = 10 } = options;
+          const { pageSize = 10, hasMore = false, onLoadMore = null } = options;
 
           this.container = document.querySelector(container);
           this.elementsToRender = elementsToRender;
@@ -1122,6 +1117,8 @@
           this.pageSize = pageSize;
           this.currentPage = 1;
           this.totalPages = Math.ceil(elementsToRender.length / pageSize);
+          this.hasMore = hasMore;
+          this.onLoadMore = onLoadMore;
         }
 
         init() {
@@ -1148,6 +1145,11 @@
             existingPagination.remove();
           }
 
+       
+          if (this.elementsToRender.length === 0) {
+            return;
+          }
+
           const paginationDiv = document.createElement("div");
           paginationDiv.className = "pagination-controls";
           paginationDiv.style.cssText = `width: 100%;
@@ -1172,12 +1174,18 @@
           const nextButton = document.createElement("button");
           nextButton.className = "button";
           nextButton.textContent = "Next";
-          nextButton.disabled = this.currentPage === this.totalPages;
-          nextButton.onclick = () => this.goToPage(this.currentPage + 1);
+          nextButton.disabled = this.currentPage === this.totalPages && !this.hasMore;
+          nextButton.onclick = () => {
+            if (this.currentPage < this.totalPages) {
+              this.goToPage(this.currentPage + 1);
+            } else if (this.hasMore && this.onLoadMore) {
+              this.onLoadMore();
+            }
+          };
 
           // Page info
           const pageInfo = document.createElement("span");
-          pageInfo.textContent = `Page ${this.currentPage} of ${this.totalPages}`;
+          pageInfo.textContent = `Page ${this.currentPage}`;
 
           paginationDiv.appendChild(prevButton);
           paginationDiv.appendChild(pageInfo);
@@ -1196,11 +1204,18 @@
           this.renderPagination();
         }
 
-        update(newElements) {
+        update(newElements, hasMore = false, shouldAdvance = false) {
           this.elementsToRender = newElements;
           this.totalPages = Math.ceil(newElements.length / this.pageSize);
-          this.currentPage = 1;
-          this.init();
+          this.hasMore = hasMore;
+          if (shouldAdvance && this.currentPage < this.totalPages) {
+            this.currentPage++;
+          } else if (this.currentPage > this.totalPages) {
+           this.currentPage = this.totalPages;
+          }
+          this.container.innerHTML = "";
+          this.renderCurrentPage();
+          this.renderPagination();
         }
 
         clear() {
@@ -1217,6 +1232,10 @@
 
       // Initialize transactions variable
       let transactionsLazyLoader;
+      let allTransactions = [];
+      let currentCursor = null;
+      let currentAddress = null;
+      let isLoadingMore = false;
 
       // Add render object with transaction rendering functions
       const render = {
@@ -1225,18 +1244,28 @@
             if (!address || !bscOperator.isValidAddress(address)) {
               return;
             }
+            // Reset if new address
+            if (address !== currentAddress) {
+              allTransactions = [];
+              currentCursor = null;
+              currentAddress = address;
+            }
+            
             getRef("address_transactions").classList.remove("hidden");
             getRef("transactions_list").innerHTML =
               '<sm-spinner class="justify-self-center margin-top-1-5"></sm-spinner>';
 
-            Promise.all([bscOperator.getTransactionHistory(address)]).then(
+            Promise.all([bscOperator.getTransactionHistory(address, currentCursor)]).then(
               async ([response]) => {
                 if (!response || response.error) {
                   getRef("transactions_list").textContent =
                     "Error fetching transactions";
                   return;
                 }
-                const data = response;
+                // Extract transactions array from response object
+                const data = response.transactions || response;
+                currentCursor = response.nextCursor || null;
+                const hasMore = response.hasMore || false;
 
                 if (data && data.length > 0) {
                   const transactions = data.map((tx) => {
@@ -1256,30 +1285,27 @@
                     };
                     return txObj;
                   });
+                  
+                  // Add new transactions to the collection
+                  allTransactions = allTransactions.concat(transactions);
+                  
                   // Filter
                   const filter = getRef("filter_selector").value || "all";
-                  let filteredTransactions = transactions;
+                  let filteredTransactions = allTransactions;
 
                   if (filter === "sent") {
-                    filteredTransactions = transactions.filter(
+                    filteredTransactions = allTransactions.filter(
                       (tx) => tx.type === "out"
                     );
                   } else if (filter === "received") {
-                    filteredTransactions = transactions.filter(
+                    filteredTransactions = allTransactions.filter(
                       (tx) => tx.type === "in"
                     );
                   }
 
-                  transactionsLazyLoader = new LazyLoader(
-                    "#transactions_list",
-                    filteredTransactions,
-                    render.transactionCard,
-                    {
-                      pageSize: 10,
-                    }
-                  );
                   if (transactionsLazyLoader) {
-                    transactionsLazyLoader.update(filteredTransactions);
+                    transactionsLazyLoader.update(filteredTransactions, hasMore, isLoadingMore);
+                    isLoadingMore = false;
                   } else {
                     transactionsLazyLoader = new LazyLoader(
                       "#transactions_list",
@@ -1287,6 +1313,13 @@
                       render.transactionCard,
                       {
                         pageSize: 10,
+                        hasMore: hasMore,
+                        onLoadMore: () => {
+                          if (currentCursor) {
+                            isLoadingMore = true;
+                            render.transactions(currentAddress);
+                          }
+                        }
                       }
                     );
                     transactionsLazyLoader.init();
@@ -1303,7 +1336,7 @@
                         (tx) => tx.type === "in"
                       );
                     }
-                    transactionsLazyLoader.update(newFilteredTransactions);
+                    transactionsLazyLoader.update(newFilteredTransactions, currentCursor ? true : false);
                   });
                   const list = getRef("transactions_list");
                   list.onclick = (event) => {
@@ -1318,13 +1351,24 @@
                     "transactions_list"
                   ).previousElementSibling.classList.remove("hidden");
                 } else {
+                  getRef("transactions_list").innerHTML = "";
+                  if (transactionsLazyLoader) {
+                    transactionsLazyLoader.clear();
+                    transactionsLazyLoader = null;
+                  }
                   getRef("transactions_list").textContent =
                     "No transactions found";
+                  getRef("transactions_list").previousElementSibling.classList.add("hidden");
                 }
               }
             );
           } catch (error) {
             console.error("[DEBUG] Error fetching transactions:", error);
+            getRef("transactions_list").innerHTML = "";
+            if (transactionsLazyLoader) {
+              transactionsLazyLoader.clear();
+              transactionsLazyLoader = null;
+            }
             getRef("transactions_list").textContent =
               "Error fetching transactions";
           }
@@ -1401,9 +1445,7 @@
               ${
                 transactionDetails.block < 0
                   ? "Pending"
-                  : transactionDetails.confirmations > 6
-                  ? "Confirmed"
-                  : `${transactionDetails.confirmations} confirmations`
+                  : `${transactionDetails.confirmations} Confirmations`
               }
             </div>
           </div>
@@ -1681,7 +1723,6 @@
           return timestamp;
         }
       }
-
       function renderHome(state) {
         getRef("page_container").dataset.page = "home";
         renderElem(
@@ -1694,14 +1735,19 @@
               <h4>Searched addresses</h4>
               <ul id="searched_addresses_list" class="grid gap-0-5"></ul>
             </aside>
-            <section id="balance_section" class="grid gap-1-5">
-              <h2>Check Binance, USDC and USDT balance</h2>
+            <section
+              id="balance_section"
+              class="grid gap-1-5"
+              style="width: min(32rem, 100%);"
+            >
+              
+              <h2>Check BSC, USDC and USDT balance</h2>
               <sm-form oninvalid="handleInvalidSearch()">
                 <div id="input_wrapper">
                   <sm-input
                     id="check_balance_input"
                     class="password-field flex-1"
-                    placeholder="FLO/BTC private key or BSC address"
+                    placeholder="Enter BSC address, tx hash, or private key"
                     type="password"
                     animate
                     required
@@ -1716,7 +1762,7 @@
                       width="24px"
                       fill="#000000"
                     >
-                      <g><rect fill="none" height="24" width="24"></rect></g>
+                      <g><rect fill="none" height="24" width="24" /></g>
                       <g>
                         <path
                           d="M21,10h-8.35C11.83,7.67,9.61,6,7,6c-3.31,0-6,2.69-6,6s2.69,6,6,6c2.61,0,4.83-1.67,5.65-4H13l2,2l2-2l2,2l4-4.04L21,10z M7,15c-1.65,0-3-1.35-3-3c0-1.65,1.35-3,3-3s3,1.35,3,3C10,13.65,8.65,15,7,15z"
@@ -1743,10 +1789,10 @@
                         <path
                           d="M0 0h24v24H0zm0 0h24v24H0zm0 0h24v24H0zm0 0h24v24H0z"
                           fill="none"
-                        ></path>
+                        />
                         <path
                           d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"
-                        ></path>
+                        />
                       </svg>
                       <svg
                         class="icon visible"
@@ -1757,10 +1803,10 @@
                         fill="#000000"
                       >
                         <title>Show password</title>
-                        <path d="M0 0h24v24H0z" fill="none"></path>
+                        <path d="M0 0h24v24H0z" fill="none" />
                         <path
                           d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"
-                        ></path>
+                        />
                       </svg>
                     </label>
                   </sm-input>
@@ -1772,13 +1818,14 @@
                       onclick=${() => checkBalance()}
                       disabled
                     >
-                      Check balance
+                      Search
                     </button>
                   </div>
                 </div>
               </sm-form>
+
               <div id="bsc_balance_wrapper" class="grid gap-2 hidden">
-                 <div class="balance-card">
+                <div class="balance-card">
                   <div class="grid">
                     <div class="label">BSC address</div>
                     <sm-copy id="BSC_address"></sm-copy>
@@ -1803,8 +1850,10 @@
                       </li>
                     </ul>
                   </div>
-                </div></div>
-                <div
+                </div>
+              </div>
+
+              <div
                 id="address_transactions"
                 class="grid gap-2 hidden"
                 style="width: min(32rem, 100%);"
@@ -1857,7 +1906,7 @@
                 </div>
               </div>
             </section>
-             <div id="tx_details" class="hidden"></div>
+            <div id="tx_details" class="hidden"></div>
           `
         );
         if (
@@ -1996,40 +2045,74 @@
               return;
             }
             const renderedContacts = [];
-            for (const floAddress in contacts) {
-              const { BSCAddress } = contacts[floAddress];
+            for (const contactKey in contacts) {
+              const { BSCAddress } = contacts[contactKey];
+              
+             const isBSCAddress = contactKey.startsWith('0x') && bscOperator.isValidAddress(contactKey);
+              const floAddress = isBSCAddress ? null : contactKey;
+
+              if (floAddress && (floAddress === 'null' || floAddress === 'undefined' || floAddress.trim() === 'null')) {
+                continue;
+              }
+              
+              const displayAddress = floAddress || BSCAddress;
+              
+              // Create local copies to ensure proper closure capture
+              const localFloAddress = floAddress;
+              const localBSCAddress = BSCAddress;
+              const localContactKey = contactKey;
+              
               renderedContacts.push(html` <li
                 class="contact"
-                .dataset=${{ floAddress, BSCAddress }}
+                .dataset=${{ floAddress: localContactKey, BSCAddress: localBSCAddress }}
               >
-                ${floAddress === BSCAddress
-                  ? html``
-                  : html`
-                      <sm-chips
-                        onchange=${(e) =>
-                          (e.target
-                            .closest(".contact")
-                            .querySelector("sm-copy").value = e.target.value)}
-                      >
-                        <sm-chip value=${floAddress} selected
-                          >${floAddress.startsWith("F")
+                ${localFloAddress
+                  ? html`
+                      <sm-chips>
+                        <sm-chip 
+                          value=${localFloAddress} 
+                          selected
+                          onclick=${(e) => {
+                            const copyElement = e.target.closest(".contact").querySelector("sm-copy");
+                            copyElement.value = localFloAddress;
+                            
+                            // Update selected state visually
+                            const smChips = e.target.parentElement;
+                            smChips.querySelectorAll('sm-chip').forEach(chip => chip.removeAttribute('selected'));
+                            e.target.setAttribute('selected', '');
+                          }}
+                          >${localFloAddress.startsWith("F")
                             ? "FLO"
                             : "BTC"}</sm-chip
                         >
-                        <sm-chip value=${BSCAddress}>BSC</sm-chip>
+                        <sm-chip 
+                          value=${localBSCAddress}
+                          onclick=${(e) => {
+                            const copyElement = e.target.closest(".contact").querySelector("sm-copy");
+                            copyElement.value = localBSCAddress;
+                            
+                            // Update selected state visually
+                            const smChips = e.target.parentElement;
+                            smChips.querySelectorAll('sm-chip').forEach(chip => chip.removeAttribute('selected'));
+                            e.target.setAttribute('selected', '');
+                          }}
+                          >BSC</sm-chip>
                       </sm-chips>
-                    `}
-                <sm-copy value="${floAddress}"></sm-copy>
+                    `
+                  : html``}
+                <sm-copy value="${displayAddress}"></sm-copy>
                 <div class="flex align-center space-between gap-0-5">
                   <button
                     class="button button--small"
-                    onclick=${() => deleteContact(floAddress)}
+                    onclick=${() => deleteContact(localContactKey)}
                   >
                     Delete
                   </button>
                   <button
                     class="button button--colored button--small"
-                    onclick=${() => checkBalance(BSCAddress, floAddress)}
+                    onclick=${() => {
+                      checkBalance(localBSCAddress, localFloAddress);
+                    }}
                   >
                     Check balance
                   </button>
@@ -2045,6 +2128,7 @@
             console.error(error);
           });
       }
+
       function renderTdx(state) {
         getRef("page_container").dataset.page = "tdx";
 
@@ -2080,7 +2164,7 @@
               </div>
 
               <div id="tx_details_container" class="tx-content">
-                <div class="loading-state" style="display: flex; flex-direction: column; align-items: center;">
+                <div class="loading-state" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 300px; gap: 1rem;">
                   <sm-spinner size="lg"></sm-spinner>
                   <p class="loading-text">Fetching transaction details...</p>
                 </div>
@@ -2132,15 +2216,21 @@
               html`
                 <div class="tx-card" id="tx-status">
                   <!-- Status Header -->
-                  <div class="tx-status-header">
-                    <div
-                      id="tx_status_indicator"
-                      class="status-indicator"
-                    ></div>
-                    <div class="status-details">
-                      <h3 id="tx_status_title" class="status-title"></h3>
-                      <p id="tx_status_subtext" class="status-subtext"></p>
+                  <div class="tx-status-header" style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;">
+                    <div style="display: flex; align-items: center; gap: 1rem; flex: 1; min-width: 0;">
+                      <div
+                        id="tx_status_indicator"
+                        class="status-indicator"
+                        style="flex-shrink: 0;"
+                      ></div>
+                      <div class="status-details" style="min-width: 0;">
+                        <h3 id="tx_status_title" class="status-title"></h3>
+                        <p id="tx_status_subtext" class="status-subtext"></p>
+                      </div>
                     </div>
+                    <a id="tx_explorer_link" target="_blank" rel="noopener noreferrer" class="button button--primary" style="text-decoration: none; padding: 0.4rem 0.75rem; font-size: 0.8rem; white-space: nowrap; flex-shrink: 0;">
+                      BSCScan
+                    </a>
                   </div>
 
                   <!-- Main Transaction Info -->
@@ -2219,7 +2309,7 @@
             if (getRef("tx_status_title")) {
               getRef("tx_status_title").textContent =
                 status === "confirmed"
-                  ? "Transaction Confirmed"
+                  ? `${tx.confirmations || 0} Confirmations`
                   : "Transaction Pending";
             }
 
@@ -2261,6 +2351,9 @@
             }
 
             if (getRef("tx_hash")) getRef("tx_hash").value = tx.hash;
+            if (getRef("tx_explorer_link")) {
+              getRef("tx_explorer_link").href = `https://bscscan.com/tx/${tx.hash}`;
+            }
 
             if (getRef("tx_value")) {
               getRef("tx_value").dataset.bsc = value;
@@ -2437,10 +2530,8 @@
       }
 
       function checkBalance(BSCAddress, floAddress) {
-        if (BSCAddress && getRef("check_balance_input")) {
-          getRef("check_balance_input").value = BSCAddress;
-        }
-
+        if (window.checkingBalance) return;
+        
         if (!BSCAddress) {
           let keyToConvert = document
             .querySelector("#check_balance_input")
@@ -2452,22 +2543,42 @@
           } else if (bscOperator.isValidAddress(keyToConvert)) {
             BSCAddress = keyToConvert;
           } else {
+            // Handle raw hex private key (BSC)
             if (/^[0-9a-fA-F]{64}$/.test(keyToConvert)) {
-              keyToConvert = coinjs.privkey2wif(keyToConvert);
+              // Raw hex is BSC private key, just derive BSC address
+              BSCAddress = floEthereum.ethAddressFromPrivateKey(keyToConvert);
+              floAddress = null; 
+            } 
+            // Handle FLO private key (starts with R)
+            else if (keyToConvert.startsWith("R")) {
+              const ethPrivateKey = coinjs.wif2privkey(keyToConvert).privkey;
+              BSCAddress = floEthereum.ethAddressFromPrivateKey(ethPrivateKey);
+              floAddress = floCrypto.getFloID(keyToConvert);
             }
-            const ethPrivateKey = coinjs.wif2privkey(keyToConvert).privkey;
-            BSCAddress = floEthereum.ethAddressFromPrivateKey(ethPrivateKey);
-            floAddress = keyToConvert.startsWith("R")
-              ? floCrypto.getFloID(keyToConvert)
-              : btcOperator.bech32Address(keyToConvert);
+            // Handle BTC private key (starts with L or K)
+            else if (keyToConvert.startsWith("L") || keyToConvert.startsWith("K")) {
+              const ethPrivateKey = coinjs.wif2privkey(keyToConvert).privkey;
+              BSCAddress = floEthereum.ethAddressFromPrivateKey(ethPrivateKey);
+              floAddress = btcOperator.bech32Address(keyToConvert);
+            }
+            else {
+              const ethPrivateKey = coinjs.wif2privkey(keyToConvert).privkey;
+              BSCAddress = floEthereum.ethAddressFromPrivateKey(ethPrivateKey);
+              floAddress = keyToConvert.startsWith("R")
+                ? floCrypto.getFloID(keyToConvert)
+                : btcOperator.bech32Address(keyToConvert);
+            }
           }
         }
 
         if (!BSCAddress) return;
 
+        window.checkingBalance = true;
+
         // Store the address for navigation context
         window.lastViewedAddress = BSCAddress;
 
+        // Update URL without triggering a page reload
         window.location.hash = `#/balance/${BSCAddress}`;
 
         buttonLoader("check_balance_button", true);
@@ -2477,25 +2588,33 @@
           bscOperator.getTokenBalance(BSCAddress, "usdt"),
         ])
           .then(([BinanceBalance, usdcBalance, usdtBalance]) => {
-            compactIDB
-              .readData("contacts", floAddress || BSCAddress)
-              .then((result) => {
-                if (result) return;
-                compactIDB
-                  .addData(
-                    "contacts",
-                    {
-                      BSCAddress,
-                    },
-                    floAddress || BSCAddress
-                  )
-                  .then(() => {
-                    renderSearchedAddressList();
-                  })
-                  .catch((error) => {
-                    console.error(error);
-                  });
-              });
+            // First check if any contact with this BSC address already exists
+            compactIDB.readAllData("contacts").then((allContacts) => {
+              const existingContact = Object.entries(allContacts).find(
+                ([key, contact]) => contact.BSCAddress === BSCAddress
+              );
+              
+              // If BSC address already exists in any contact, don't add again
+              if (existingContact) {
+                renderSearchedAddressList();
+                return;
+              }
+              
+              compactIDB
+                .addData(
+                  "contacts",
+                  {
+                    BSCAddress,
+                  },
+                  floAddress || BSCAddress
+                )
+                .then(() => {
+                  renderSearchedAddressList();
+                })
+                .catch((error) => {
+                  console.error(error);
+                });
+            });
             renderElem(
               getRef("bsc_balance_wrapper"),
               html`
@@ -2579,6 +2698,8 @@
           })
           .finally(() => {
             buttonLoader("check_balance_button", false);
+          
+            window.checkingBalance = false;
           });
       }
 
@@ -2587,11 +2708,13 @@
           document.startViewTransition(() => {
             getRef("bsc_balance_wrapper").classList.add("hidden");
             getRef("address_transactions").classList.add("hidden");
+            // Clear the search input
             getRef("check_balance_input").value = "";
           });
         } else {
           getRef("bsc_balance_wrapper").classList.add("hidden");
           getRef("address_transactions").classList.add("hidden");
+          // Clear the search input
           getRef("check_balance_input").value = "";
         }
       }
@@ -2633,80 +2756,75 @@
                     Check balance
                   </button>
                 </div>
-               
 
-
-
- 
-        <sm-input
-        id="private_key_input"
-        placeholder="Sender's FLO/BTC/BSC private key"
-        oninput=${handleSenderInput}
-        data-private-key
-        class="password-field"
-        type="password"
-        animate
-        required
-      >
-        <svg
-          class="icon"
-          slot="icon"
-          xmlns="http://www.w3.org/2000/svg"
-          enable-background="new 0 0 24 24"
-          height="24px"
-          viewBox="0 0 24 24"
-          width="24px"
-          fill="#000000"
-        >
-          <g><rect fill="none" height="24" width="24"></rect></g>
-          <g>
-            <path
-              d="M21,10h-8.35C11.83,7.67,9.61,6,7,6c-3.31,0-6,2.69-6,6s2.69,6,6,6c2.61,0,4.83-1.67,5.65-4H13l2,2l2-2l2,2l4-4.04L21,10z M7,15c-1.65,0-3-1.35-3-3c0-1.65,1.35-3,3-3s3,1.35,3,3C10,13.65,8.65,15,7,15z"
-            ></path>
-          </g>
-        </svg>
-        <label slot="right" class="interact">
-          <input
-            type="checkbox"
-            class="hidden"
-            autocomplete="off"
-            readonly
-            onchange="togglePrivateKeyVisibility(this)"
-          />
-          <svg
-            class="icon invisible"
-            xmlns="http://www.w3.org/2000/svg"
-            height="24px"
-            viewBox="0 0 24 24"
-            width="24px"
-            fill="#000000"
-          >
-            <title>Hide password</title>
-            <path
-              d="M0 0h24v24H0zm0 0h24v24H0zm0 0h24v24H0zm0 0h24v24H0z"
-              fill="none"
-            ></path>
-            <path
-              d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"
-            ></path>
-          </svg>
-          <svg
-            class="icon visible"
-            xmlns="http://www.w3.org/2000/svg"
-            height="24px"
-            viewBox="0 0 24 24"
-            width="24px"
-            fill="#000000"
-          >
-            <title>Show password</title>
-            <path d="M0 0h24v24H0z" fill="none"></path>
-            <path
-              d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"
-            ></path>
-          </svg>
-        </label>
-      </sm-input>
-
+                <sm-input
+                  id="private_key_input"
+                  placeholder="Sender's FLO/BTC/BSC private key"
+                  oninput=${handleSenderInput}
+                  data-private-key
+                  class="password-field"
+                  type="password"
+                  animate
+                  required
+                >
+                  <svg
+                    class="icon"
+                    slot="icon"
+                    xmlns="http://www.w3.org/2000/svg"
+                    enable-background="new 0 0 24 24"
+                    height="24px"
+                    viewBox="0 0 24 24"
+                    width="24px"
+                    fill="#000000"
+                  >
+                    <g><rect fill="none" height="24" width="24"></rect></g>
+                    <g>
+                      <path
+                        d="M21,10h-8.35C11.83,7.67,9.61,6,7,6c-3.31,0-6,2.69-6,6s2.69,6,6,6c2.61,0,4.83-1.67,5.65-4H13l2,2l2-2l2,2l4-4.04L21,10z M7,15c-1.65,0-3-1.35-3-3c0-1.65,1.35-3,3-3s3,1.35,3,3C10,13.65,8.65,15,7,15z"
+                      ></path>
+                    </g>
+                  </svg>
+                  <label slot="right" class="interact">
+                    <input
+                      type="checkbox"
+                      class="hidden"
+                      autocomplete="off"
+                      readonly
+                      onchange="togglePrivateKeyVisibility(this)"
+                    />
+                    <svg
+                      class="icon invisible"
+                      xmlns="http://www.w3.org/2000/svg"
+                      height="24px"
+                      viewBox="0 0 24 24"
+                      width="24px"
+                      fill="#000000"
+                    >
+                      <title>Hide password</title>
+                      <path
+                        d="M0 0h24v24H0zm0 0h24v24H0zm0 0h24v24H0zm0 0h24v24H0z"
+                        fill="none"
+                      ></path>
+                      <path
+                        d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"
+                      ></path>
+                    </svg>
+                    <svg
+                      class="icon visible"
+                      xmlns="http://www.w3.org/2000/svg"
+                      height="24px"
+                      viewBox="0 0 24 24"
+                      width="24px"
+                      fill="#000000"
+                    >
+                      <title>Show password</title>
+                      <path d="M0 0h24v24H0z" fill="none"></path>
+                      <path
+                        d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"
+                      ></path>
+                    </svg>
+                  </label>
+                </sm-input>
 
                 <div
                   id="sender_balance_container"
@@ -2840,88 +2958,25 @@
         }
       });
 
- 
-
-
       // function togglePrivateKeyVisibility(input) {
       //   const target = input.closest("sm-input") ;
       //   target.type = target.type === "password" ? "text" : "password";
       //   target.focusIn();
       // }
 
-
-
- 
       function togglePrivateKeyVisibility(input) {
-        console.log(input)
-  const target = input.closest("sm-input");
-  // const checkBalanceButton = document.querySelector("#check_balance_button");
-        console.log(target)
-  target.type = target.type === "password" ? "text" : "password";
-  // target.focus();
+        const target = input.closest("sm-input");
+        target.type = target.type === "password" ? "text" : "password";
+      }
 
-  
-  // checkBalanceButton.disabled = false;
-}
-
- 
-
-
- 
-
-
- 
-
- 
-
-
-
- 
-
-
-
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 
-
-
- 
-
-
-
-
-
-
-
-
-
-
-
-// const toggleButton = document.querySelector('#toggleButton');
-// const privateKeyInput = document.querySelector('#private_key_input');
-
-// toggleButton.addEventListener('click', () => {
-//   togglePrivateKeyVisibility(privateKeyInput);
-// });
       function checkSenderBalance() {
         let address;
         const privateKey = getRef("private_key_input").value.trim();
-        if (!privateKey)
+
+        if (!privateKey) {
           return notify(`Please enter sender's private key to check balance`);
+        }
+
         if (
           privateKey.startsWith("R") ||
           privateKey.startsWith("L") ||
@@ -2933,15 +2988,20 @@
         } else {
           address = floEthereum.ethAddressFromPrivateKey(privateKey);
         }
+
         getRef("sender_balance_container").classList.remove("hidden");
         renderElem(
           getRef("sender_balance_container"),
           html` Loading balance...<sm-spinner></sm-spinner> `
         );
-        const promises = [bscOperator.getBalance(address)];
+
         const selectedAsset = getRef("asset_selector").value;
-        if (selectedAsset !== "Binance")
+
+        const promises = [bscOperator.getBalance(address)];
+        if (selectedAsset !== "Binance") {
           promises.push(bscOperator.getTokenBalance(address, selectedAsset));
+        }
+
         Promise.all(promises)
           .then(([ethBalance, tokenBalance]) => {
             renderElem(
@@ -2962,8 +3022,7 @@
                     Balance:
                     <b class="amount-shown">${ethBalance} BSC</b>
                     ${selectedAsset !== "Binance"
-                      ? html`|
-                          <b class="amount-shown"
+                      ? html`|<b class="amount-shown"
                             >${tokenBalance} ${selectedAsset.toUpperCase()}</b
                           >`
                       : ""}
@@ -2977,7 +3036,6 @@
           });
       }
       function handleSenderInput(e) {
-        console.log(e.target.isValid)
         getRef("check_balance_button").disabled = false;
         if (!e.target.isValid) {
           // getRef("sender_balance_container").classList.add("hidden");
@@ -2998,25 +3056,28 @@
         getRef("send_tx_button").textContent = `Send ${asset.toUpperCase()}`;
       }
       async function sendTx() {
-        const receiver = getRef("send_tx_form")
-          .querySelector(".receiver-address")
-          .value.trim();
-        const amount = getRef("send_tx_form")
-          .querySelector(".receiver-amount")
-          .value.trim();
+        const receiver = getRef("receiver_input").value.trim();
+        const amount = getRef("amount_input").value.trim();
         const asset = getRef("asset_selector").value;
+
         try {
           const confirmation = await getConfirmation("Send transaction", {
             message: `You are about to send ${amount} ${asset.toUpperCase()} to ${receiver}`,
             confirmText: "Send",
           });
+
+          if (!confirmation) {
+            return;
+          }
+
           buttonLoader("send_tx_button", true);
-          if (!confirmation) return;
           let privateKey = getRef("private_key_input").value.trim();
+
           if (/^[0-9a-fA-F]{64}$/.test(privateKey)) {
             privateKey = coinjs.privkey2wif(privateKey);
           }
           privateKey = coinjs.wif2privkey(privateKey).privkey;
+
           switch (asset) {
             case "Binance": {
               const tx = await bscOperator.sendTransaction({
@@ -3044,9 +3105,7 @@
             }
           }
           getRef("send_tx_form").reset();
-          // getRef("sender_balance_container").classList.add("hidden");
         } catch (e) {
-          console.error(e.message);
           showTransactionResult("failed", {
             description: `Insufficient ${asset.toUpperCase()} balance`,
           });
@@ -3054,11 +3113,11 @@
           const match = e.message.match(regex);
           if (match && match[1]) {
             const { code } = JSON.parse(match[1]);
-            if (code === -32000)
+            if (code === -32000) {
               showTransactionResult("failed", {
                 description: `Insufficient ${asset.toUpperCase()} balance`,
               });
-            else {
+            } else {
               showTransactionResult("failed", { description: e.message });
             }
           }
@@ -3066,218 +3125,108 @@
           buttonLoader("send_tx_button", false);
         }
       }
-      // function showTransactionResult(status, { txHash, description = "" }) {
-      //   switch (status) {
-      //     case "pending":
-      //       renderElem(
-      //         getRef("transaction_result_popup__content"),
-      //         html`
-      //           <ul>
-      //             <li class="transaction__phase">
-      //               <svg
-      //                 class="icon confirmed"
-      //                 xmlns="http://www.w3.org/2000/svg"
-      //                 height="24px"
-      //                 viewBox="0 0 24 24"
-      //                 width="24px"
-      //                 fill="#000000"
-      //               >
-      //                 <path d="M0 0h24v24H0V0z" fill="none" />
-      //                 <path
-      //                   d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"
-      //                 />
-      //               </svg>
-      //               <h4>Transaction sent</h4>
-      //             </li>
-      //             <li class="transaction__phase">
-      //               <sm-spinner></sm-spinner>
-      //               <p>Waiting for transaction to be confirmed</p>
-      //             </li>
-      //           </ul>
-      //           <div class="grid">
-      //             <span class="label">Transaction ID</span>
-      //             <sm-copy value=${txHash}></sm-copy>
-      //           </div>
-      //           <a
-      //             class="button button--primary"
-      //             target="_blank"
-      //             href=${`https://bscscan.com/tx/${txHash}`}
-      //             >Check transaction status</a
-      //           >
-      //         `
-      //       );
-      //       break;
-      //     case "confirmed":
-      //       renderElem(
-      //         getRef("transaction_result_popup__content"),
-      //         html`
-      //           <svg
-      //             class="icon user-action-result__icon confirmed"
-      //             xmlns="http://www.w3.org/2000/svg"
-      //             height="24px"
-      //             viewBox="0 0 24 24"
-      //             width="24px"
-      //             fill="#000000"
-      //           >
-      //             <path d="M0 0h24v24H0V0z" fill="none" />
-      //             <path
-      //               d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"
-      //             />
-      //           </svg>
-      //           <div class="grid gap-0-5 justify-center text-center">
-      //             <h4>Transaction confirmed</h4>
-      //             <p>Transaction has been confirmed on the blockchain.</p>
-      //           </div>
-      //           <div class="grid">
-      //             <span class="label">Transaction ID</span>
-      //             <sm-copy value=${txHash}></sm-copy>
-      //           </div>
-      //           <a
-      //             class="button button--primary"
-      //             target="_blank"
-      //             href=${`https://bscscan.com/tx/${txHash}`}
-      //             >Check transaction status</a
-      //           >
-      //         `
-      //       );
-      //       break;
-      //     case "failed":
-      //       renderElem(
-      //         getRef("transaction_result_popup__content"),
-      //         html`
-      //           <svg
-      //             class="icon user-action-result__icon failed"
-      //             xmlns="http://www.w3.org/2000/svg"
-      //             height="24px"
-      //             viewBox="0 0 24 24"
-      //             width="24px"
-      //             fill="#000000"
-      //           >
-      //             <path
-      //               d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
-      //             />
-      //           </svg>
-      //           <div class="grid gap-0-5 justify-center text-center">
-      //             <h4>Transaction failed</h4>
-      //             <p>${description}</p>
-      //           </div>
-      //         `
-      //       );
-      //       break;
-      //   }
-      //   openPopup("transaction_result_popup");
-      // }
 
-      // *************************************************************************
-      
-// ***************************************************************************
-
-      // function showTransactionResult(status, { txHash, description = "Insufficient BSC balance" })
-      //  { switch (status) 
-      //   { case "pending": renderElem( getRef("transaction_result_popup__content"), 
-      //   html` <ul> <li class="transaction__phase"> <svg class="icon confirmed" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000" > <path d="M0 0h24v24H0V0z" fill="none" /> <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" /> </svg> <h4>Transaction sent</h4> </li> <li class="transaction__phase"> <sm-spinner></sm-spinner> <p>Waiting for transaction to be confirmed</p> </li> </ul> 
-      //   <div class="grid"> <span class="label">Transaction ID</span> 
-      //     <sm-copy value=${txHash}></sm-copy> </div> 
-      //     <a class="button button--primary" target="_blank" href=${`https://bscscan.com/tx/${txHash}`} >Check transaction status</a > ` ); 
-      //       break; 
-      //       case "confirmed":
-      //          renderElem( getRef("transaction_result_popup__content"), 
-      //          html` <svg class="icon user-action-result__icon confirmed" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000" > <path d="M0 0h24v24H0V0z" fill="none" /> <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" /> </svg> 
-      //          <div class="grid gap-0-5 justify-center text-center"> 
-      //           <h4>Transaction confirmed</h4> 
-      //           <p>Transaction has been confirmed on the blockchain.</p> </div>
-      //            <div class="grid"> <span class="label">Transaction ID</span> 
-      //             <sm-copy value=${txHash}></sm-copy> </div> 
-      //             <a class="button button--primary" target="_blank" href=${`https://bscscan.com/tx/${txHash}`} >Check transaction status</a > ` );
-      //                break; 
-      //                case "failed": renderElem( getRef("transaction_result_popup__content"),
-      //                 html` <svg class="icon user-action-result__icon failed" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000" > <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" /> </svg> <div class="grid gap-0-5 justify-center text-center"> 
-      //                   <h4>Transaction failed</h4>
-      //                    <p>"Insufficient BSC balance"</p> </div> ` );
-      //                     break; 
-      //                   } openPopup("transaction_result_popup"); } 
-       
-                // showTransactionResult("failed", { txHash: "your-tx-hash-here", description: "Insufficient BSC balance" });
-                function showTransactionResult(status, { txHash, usdtBalance, bscBalance }) {
-  let description = "Insufficient BSC balance";
-
-  if (usdtBalance <= 0) {
-    description = "Insufficient USDT balance";
-  } else if (bscBalance <= 0) {
-    description = "Insufficient BSC balance";
-  }
-
-  switch (status) {
-    case "pending":
-      renderElem(
-        getRef("transaction_result_popup__content"),
-        html`
-          <ul>
-            <li class="transaction__phase">
-              <svg class="icon confirmed" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
-                <path d="M0 0h24v24H0V0z" fill="none" />
-                <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
-              </svg>
-              <h4>Transaction sent</h4>
-            </li>
-            <li class="transaction__phase">
-              <sm-spinner></sm-spinner>
-              <p>Waiting for transaction to be confirmed</p>
-            </li>
-          </ul>
-          <div class="grid">
-            <span class="label">Transaction ID</span>
-            <sm-copy value=${txHash}></sm-copy>
-          </div>
-          <a class="button button--primary" target="_blank" href=${`https://bscscan.com/tx/${txHash}`}>
-            Check transaction status
-          </a>
-        `
-      );
-      break;
-    case "confirmed":
-      renderElem(
-        getRef("transaction_result_popup__content"),
-        html`
-          <svg class="icon user-action-result__icon confirmed" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
-            <path d="M0 0h24v24H0V0z" fill="none" />
-            <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
-          </svg>
-          <div class="grid gap-0-5 justify-center text-center">
-            <h4>Transaction confirmed</h4>
-            <p>Transaction has been confirmed on the blockchain.</p>
-          </div>
-          <div class="grid">
-            <span class="label">Transaction ID</span>
-            <sm-copy value=${txHash}></sm-copy>
-          </div>
-          <a class="button button--primary" target="_blank" href=${`https://bscscan.com/tx/${txHash}`}>
-            Check transaction status
-          </a>
-        `
-      );
-      break;
-    case "failed":
-      renderElem(
-        getRef("transaction_result_popup__content"),
-        html`
-          <svg class="icon user-action-result__icon failed" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
-          </svg>
-          <div class="grid gap-0-5 justify-center text-center">
-            <h4>Transaction failed</h4>
-            <p>${description}</p>
-          </div>
-        `
-      );
-      break;
-  }
-  openPopup("transaction_result_popup");
-}
-    
-     
-              
-
+      function showTransactionResult(status, { txHash, description = "" }) {
+        switch (status) {
+          case "pending":
+            renderElem(
+              getRef("transaction_result_popup__content"),
+              html`
+                <ul>
+                  <li class="transaction__phase">
+                    <svg
+                      class="icon confirmed"
+                      xmlns="http://www.w3.org/2000/svg"
+                      height="24px"
+                      viewBox="0 0 24 24"
+                      width="24px"
+                      fill="#000000"
+                    >
+                      <path d="M0 0h24v24H0V0z" fill="none" />
+                      <path
+                        d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"
+                      />
+                    </svg>
+                    <h4>Transaction sent</h4>
+                  </li>
+                  <li class="transaction__phase">
+                    <sm-spinner></sm-spinner>
+                    <p>Waiting for transaction to be confirmed</p>
+                  </li>
+                </ul>
+                <div class="grid">
+                  <span class="label">Transaction ID</span>
+                  <sm-copy value=${txHash}></sm-copy>
+                </div>
+                <a
+                  class="button button--primary"
+                  target="_blank"
+                  href=${`https://bscscan.com/tx/${txHash}`}
+                  >Check transaction status</a
+                >
+              `
+            );
+            break;
+          case "confirmed":
+            renderElem(
+              getRef("transaction_result_popup__content"),
+              html`
+                <svg
+                  class="icon user-action-result__icon confirmed"
+                  xmlns="http://www.w3.org/2000/svg"
+                  height="24px"
+                  viewBox="0 0 24 24"
+                  width="24px"
+                  fill="#000000"
+                >
+                  <path d="M0 0h24v24H0V0z" fill="none" />
+                  <path
+                    d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"
+                  />
+                </svg>
+                <div class="grid gap-0-5 justify-center text-center">
+                  <h4>Transaction confirmed</h4>
+                  <p>Transaction has been confirmed on the blockchain.</p>
+                </div>
+                <div class="grid">
+                  <span class="label">Transaction ID</span>
+                  <sm-copy value=${txHash}></sm-copy>
+                </div>
+                <a
+                  class="button button--primary"
+                  target="_blank"
+                  href=${`https://bscscan.com/tx/${txHash}`}
+                  >Check transaction status</a
+                >
+              `
+            );
+            break;
+          case "failed":
+            renderElem(
+              getRef("transaction_result_popup__content"),
+              html`
+                <svg
+                  class="icon user-action-result__icon failed"
+                  xmlns="http://www.w3.org/2000/svg"
+                  height="24px"
+                  viewBox="0 0 24 24"
+                  width="24px"
+                  fill="#000000"
+                >
+                  <path
+                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
+                  />
+                </svg>
+                <div class="grid gap-0-5 justify-center text-center">
+                  <h4>Transaction failed</h4>
+                  <p>${description}</p>
+                </div>
+              `
+            );
+            break;
+        }
+        openPopup("transaction_result_popup");
+      }
 
       router.addRoute("create", (state) => {
         getRef("page_container").dataset.page = "create";
@@ -3384,16 +3333,86 @@
       }
       function retrieveBinanceAddr() {
         function retrieve() {
-          let bscPrivateKey = getRef("retrieve_btc_addr_field").value.trim();
-          getRef("recovered_btc_addr_wrapper").classList.remove("hidden");
-          getRef("recovered_btc_addr").value =
-            bscPrivateKey.startsWith("R") ||
-            bscPrivateKey.startsWith("L") ||
-            bscPrivateKey.startsWith("K")
-              ? floEthereum.ethAddressFromPrivateKey(
-                  coinjs.wif2privkey(bscPrivateKey).privkey
-                )
-              : floEthereum.ethAddressFromPrivateKey(bscPrivateKey);
+          try {
+            let inputPrivKey = getRef("retrieve_btc_addr_field").value.trim();
+            
+            if (!inputPrivKey) {
+              notify("Please enter a private key", "error");
+              return;
+            }
+
+            let privKey, floID, ethPrivateKey, BSCAddress, btcPrivKey, btcAddr;
+
+            // Determine the format of the input private key and derive all addresses
+            if (
+              inputPrivKey.startsWith("R") ||
+              inputPrivKey.startsWith("L") ||
+              inputPrivKey.startsWith("K")
+            ) {
+              // WIF format (FLO/BTC private key)
+              privKey = inputPrivKey;
+              floID = floCrypto.getFloID(privKey);
+              ethPrivateKey = coinjs.wif2privkey(privKey).privkey;
+              BSCAddress = floEthereum.ethAddressFromPrivateKey(ethPrivateKey);
+              btcPrivKey = btcOperator.convert.wif(privKey);
+              btcAddr = btcOperator.bech32Address(btcPrivKey);
+            } else {
+              // Hex format (BSC/ETH private key)
+              ethPrivateKey = inputPrivKey;
+              BSCAddress = floEthereum.ethAddressFromPrivateKey(ethPrivateKey);
+              // Convert hex private key to WIF format for FLO and BTC
+              privKey = coinjs.privkey2wif(ethPrivateKey);
+              floID = floCrypto.getFloID(privKey);
+              btcPrivKey = btcOperator.convert.wif(privKey);
+              btcAddr = btcOperator.bech32Address(btcPrivKey);
+            }
+
+            // Render all recovered addresses and private keys
+            renderElem(
+              getRef("recovered_addresses_wrapper"),
+              html`
+                <ul id="recovered_addresses" class="grid gap-1-5">
+                  <li class="grid gap-0-5">
+                    <div>
+                      <h5>Recovered Binance Address</h5>
+                      <sm-copy value="${BSCAddress}"></sm-copy>
+                    </div>
+                    <div>
+                      <h5>Private Key</h5>
+                      <sm-copy value="${ethPrivateKey}"></sm-copy>
+                    </div>
+                  </li>
+                  <li class="grid gap-0-5">
+                    <div>
+                      <h5>Recovered FLO Address</h5>
+                      <sm-copy value="${floID}"></sm-copy>
+                    </div>
+                    <div>
+                      <h5>Private Key</h5>
+                      <sm-copy value="${privKey}"></sm-copy>
+                    </div>
+                  </li>
+                  <li class="grid gap-0-5">
+                    <div>
+                      <h5>Recovered Bitcoin Address</h5>
+                      <sm-copy value="${btcAddr}"></sm-copy>
+                    </div>
+                    <div>
+                      <h5>Bitcoin Private Key</h5>
+                      <sm-copy value="${btcPrivKey}"></sm-copy>
+                    </div>
+                  </li>
+                </ul>
+              `
+            );
+            notify("Successfully recovered all addresses!", "success");
+          } catch (error) {
+            console.error("Error recovering addresses:", error);
+            notify(
+              "Failed to recover addresses. Please check your private key format.",
+              "error"
+            );
+          }
         }
         if (document.startViewTransition) {
           document.startViewTransition(() => {
@@ -3403,6 +3422,7 @@
       }
 
       function testHistoricalAPIAndRenderToggle() {
+        // Get date from a week ago for testing historical data
         const oneWeekAgo = Math.floor(Date.now() / 1000) - 7 * 24 * 60 * 60;
 
         fetchHistoricalRate(oneWeekAgo)
@@ -3440,6 +3460,7 @@
               `;
               container.appendChild(toggleDiv);
 
+              // Add event handler to the new toggle
               document
                 .getElementById("valuation_toggle")
                 .addEventListener("change", (e) => {
@@ -3449,8 +3470,6 @@
           }
         }
       }
-
     </script>
   </body>
 </html>
-<!-- function showTransactionResult(status, { txHash, description = "Insufficient BSC balance" }) { switch (status) { case "pending": renderElem( getRef("transaction_result_popup__content"), html` <ul> <li class="transaction__phase"> <svg class="icon confirmed" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000" > <path d="M0 0h24v24H0V0z" fill="none" /> <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" /> </svg> <h4>Transaction sent</h4> </li> <li class="transaction__phase"> <sm-spinner></sm-spinner> <p>Waiting for transaction to be confirmed</p> </li> </ul> <div class="grid"> <span class="label">Transaction ID</span> <sm-copy value=${txHash}></sm-copy> </div> <a class="button button--primary" target="_blank" href=${`https://bscscan.com/tx/${txHash}`} >Check transaction status</a > ` ); break; case "confirmed": renderElem( getRef("transaction_result_popup__content"), html` <svg class="icon user-action-result__icon confirmed" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000" > <path d="M0 0h24v24H0V0z" fill="none" /> <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" /> </svg> <div class="grid gap-0-5 justify-center text-center"> <h4>Transaction confirmed</h4> <p>Transaction has been confirmed on the blockchain.</p> </div> <div class="grid"> <span class="label">Transaction ID</span> <sm-copy value=${txHash}></sm-copy> </div> <a class="button button--primary" target="_blank" href=${`https://bscscan.com/tx/${txHash}`} >Check transaction status</a > ` ); break; case "failed": renderElem( getRef("transaction_result_popup__content"), html` <svg class="icon user-action-result__icon failed" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000" > <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" /> </svg> <div class="grid gap-0-5 justify-center text-center"> <h4>Transaction failed</h4> <p>"Insufficient BSC balance"</p> </div> ` ); break; } openPopup("transaction_result_popup"); } showTransactionResult("failed", { txHash: "your-tx-hash-here", description: "Insufficient BSC balance" }); -->

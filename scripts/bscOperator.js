@@ -1,305 +1,330 @@
-
-(function (EXPORTS) { //bscOperator v1.0.2
+(function (EXPORTS) {
+  //bscOperator v1.0.2
   /* ETH Crypto and API Operator */
-  if (!window.ethers)
-    return console.error('ethers.js not found')
+  if (!window.ethers) return console.error("ethers.js not found");
   const bscOperator = EXPORTS;
-  const isValidAddress = bscOperator.isValidAddress = (address) => {
+  const isValidAddress = (bscOperator.isValidAddress = (address) => {
     try {
       // Check if the address is a valid checksum address
       const isValidChecksum = ethers.utils.isAddress(address);
       // Check if the address is a valid non-checksum address
-      const isValidNonChecksum = ethers.utils.getAddress(address) === address.toLowerCase();
+      const isValidNonChecksum =
+        ethers.utils.getAddress(address) === address.toLowerCase();
       return isValidChecksum || isValidNonChecksum;
     } catch (error) {
       return false;
     }
-  }
+  });
   const BEP20ABI = [
     {
-      "constant": true,
-      "inputs": [],
-      "name": "name",
-      "outputs": [
+      constant: true,
+      inputs: [],
+      name: "name",
+      outputs: [
         {
-          "name": "",
-          "type": "string"
-        }
+          name: "",
+          type: "string",
+        },
       ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
+      payable: false,
+      stateMutability: "view",
+      type: "function",
     },
     {
-      "constant": false,
-      "inputs": [
+      constant: false,
+      inputs: [
         {
-          "name": "_spender",
-          "type": "address"
+          name: "_spender",
+          type: "address",
         },
         {
-          "name": "_value",
-          "type": "uint256"
-        }
+          name: "_value",
+          type: "uint256",
+        },
       ],
-      "name": "approve",
-      "outputs": [
+      name: "approve",
+      outputs: [
         {
-          "name": "",
-          "type": "bool"
-        }
+          name: "",
+          type: "bool",
+        },
       ],
-      "payable": false,
-      "stateMutability": "nonpayable",
-      "type": "function"
+      payable: false,
+      stateMutability: "nonpayable",
+      type: "function",
     },
     {
-      "constant": true,
-      "inputs": [],
-      "name": "totalSupply",
-      "outputs": [
+      constant: true,
+      inputs: [],
+      name: "totalSupply",
+      outputs: [
         {
-          "name": "",
-          "type": "uint256"
-        }
+          name: "",
+          type: "uint256",
+        },
       ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
+      payable: false,
+      stateMutability: "view",
+      type: "function",
     },
     {
-      "constant": false,
-      "inputs": [
+      constant: false,
+      inputs: [
         {
-          "name": "_from",
-          "type": "address"
+          name: "_from",
+          type: "address",
         },
         {
-          "name": "_to",
-          "type": "address"
+          name: "_to",
+          type: "address",
         },
         {
-          "name": "_value",
-          "type": "uint256"
-        }
+          name: "_value",
+          type: "uint256",
+        },
       ],
-      "name": "transferFrom",
-      "outputs": [
+      name: "transferFrom",
+      outputs: [
         {
-          "name": "",
-          "type": "bool"
-        }
+          name: "",
+          type: "bool",
+        },
       ],
-      "payable": false,
-      "stateMutability": "nonpayable",
-      "type": "function"
+      payable: false,
+      stateMutability: "nonpayable",
+      type: "function",
     },
     {
-      "constant": true,
-      "inputs": [],
-      "name": "decimals",
-      "outputs": [
+      constant: true,
+      inputs: [],
+      name: "decimals",
+      outputs: [
         {
-          "name": "",
-          "type": "uint8"
-        }
+          name: "",
+          type: "uint8",
+        },
       ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
+      payable: false,
+      stateMutability: "view",
+      type: "function",
     },
     {
-      "constant": true,
-      "inputs": [
+      constant: true,
+      inputs: [
         {
-          "name": "_owner",
-          "type": "address"
-        }
+          name: "_owner",
+          type: "address",
+        },
       ],
-      "name": "balanceOf",
-      "outputs": [
+      name: "balanceOf",
+      outputs: [
         {
-          "name": "balance",
-          "type": "uint256"
-        }
+          name: "balance",
+          type: "uint256",
+        },
       ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
+      payable: false,
+      stateMutability: "view",
+      type: "function",
     },
     {
-      "constant": true,
-      "inputs": [],
-      "name": "symbol",
-      "outputs": [
+      constant: true,
+      inputs: [],
+      name: "symbol",
+      outputs: [
         {
-          "name": "",
-          "type": "string"
-        }
+          name: "",
+          type: "string",
+        },
       ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
+      payable: false,
+      stateMutability: "view",
+      type: "function",
     },
     {
-      "constant": false,
-      "inputs": [
+      constant: false,
+      inputs: [
         {
-          "name": "_to",
-          "type": "address"
+          name: "_to",
+          type: "address",
         },
         {
-          "name": "_value",
-          "type": "uint256"
-        }
+          name: "_value",
+          type: "uint256",
+        },
       ],
-      "name": "transfer",
-      "outputs": [
+      name: "transfer",
+      outputs: [
         {
-          "name": "",
-          "type": "bool"
-        }
+          name: "",
+          type: "bool",
+        },
       ],
-      "payable": false,
-      "stateMutability": "nonpayable",
-      "type": "function"
+      payable: false,
+      stateMutability: "nonpayable",
+      type: "function",
     },
     {
-      "constant": true,
-      "inputs": [
+      constant: true,
+      inputs: [
         {
-          "name": "_owner",
-          "type": "address"
+          name: "_owner",
+          type: "address",
         },
         {
-          "name": "_spender",
-          "type": "address"
-        }
+          name: "_spender",
+          type: "address",
+        },
       ],
-      "name": "allowance",
-      "outputs": [
+      name: "allowance",
+      outputs: [
         {
-          "name": "",
-          "type": "uint256"
-        }
+          name: "",
+          type: "uint256",
+        },
       ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
+      payable: false,
+      stateMutability: "view",
+      type: "function",
     },
     {
-      "payable": true,
-      "stateMutability": "payable",
-      "type": "fallback"
+      payable: true,
+      stateMutability: "payable",
+      type: "fallback",
     },
     {
-      "anonymous": false,
-      "inputs": [
+      anonymous: false,
+      inputs: [
         {
-          "indexed": true,
-          "name": "owner",
-          "type": "address"
+          indexed: true,
+          name: "owner",
+          type: "address",
         },
         {
-          "indexed": true,
-          "name": "spender",
-          "type": "address"
+          indexed: true,
+          name: "spender",
+          type: "address",
         },
         {
-          "indexed": false,
-          "name": "value",
-          "type": "uint256"
-        }
+          indexed: false,
+          name: "value",
+          type: "uint256",
+        },
       ],
-      "name": "Approval",
-      "type": "event"
+      name: "Approval",
+      type: "event",
     },
     {
-      "anonymous": false,
-      "inputs": [
+      anonymous: false,
+      inputs: [
         {
-          "indexed": true,
-          "name": "from",
-          "type": "address"
+          indexed: true,
+          name: "from",
+          type: "address",
         },
         {
-          "indexed": true,
-          "name": "to",
-          "type": "address"
+          indexed: true,
+          name: "to",
+          type: "address",
         },
         {
-          "indexed": false,
-          "name": "value",
-          "type": "uint256"
-        }
+          indexed: false,
+          name: "value",
+          type: "uint256",
+        },
       ],
-      "name": "Transfer",
-      "type": "event"
-    }
-  ]
+      name: "Transfer",
+      type: "event",
+    },
+  ];
   const CONTRACT_ADDRESSES = {
     usdc: "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
-    usdt: "0x55d398326f99059ff775485246999027b3197955"
-  }
+    usdt: "0x55d398326f99059ff775485246999027b3197955",
+  };
   function getProvider() {
     // switches provider based on whether the user is using MetaMask or not
     const bscMainnet = {
       chainId: 56,
-      name: 'binance',
-      rpc: 'https://bsc-dataseed.binance.org/',
-      explorer: 'https://bscscan.com'
+      name: "binance",
+      rpc: "https://bsc-dataseed.binance.org/",
+      explorer: "https://bscscan.com",
     };
-  
-  
+
     if (window.ethereum) {
       return new ethers.providers.Web3Provider(window.ethereum);
     } else {
-      return new ethers.providers.JsonRpcProvider(bscMainnet.rpc, bscMainnet)
+      return new ethers.providers.JsonRpcProvider(bscMainnet.rpc, bscMainnet);
     }
   }
   function connectToMetaMask() {
     return new Promise((resolve, reject) => {
       // if (typeof window.ethereum === "undefined")
       //   return reject("MetaMask not installed");
-      return resolve(true)
+      return resolve(true);
       ethereum
-        .request({ method: 'eth_requestAccounts' })
+        .request({ method: "eth_requestAccounts" })
         .then((accounts) => {
-          console.log('Connected to MetaMask')
-          return resolve(accounts)
+          console.log("Connected to MetaMask");
+          return resolve(accounts);
         })
         .catch((err) => {
-          console.log(err)
-          return reject(err)
-        })
-    })
+          console.log(err);
+          return reject(err);
+        });
+    });
   }
   const getTransactionHistory = (bscOperator.getTransactionHistory = async (
-    address
+    address,
+    cursor = null
   ) => {
     try {
       if (!address || !isValidAddress(address))
         return new Error("Invalid address");
-      const url = `https://api.bscscan.com/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&sort=desc&apikey=N7BFDPT7X927YVKWW4XT7VWI6RP2CH38RR`;
+      
+      // Moralis API endpoint for BSC transactions
+      const MORALIS_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6IjQyZWNiMjk0LTBiMGItNDg4Yy1hNjUwLTE4NmJhMjFjNjNhYyIsIm9yZ0lkIjoiNDg4NzAzIiwidXNlcklkIjoiNTAyODExIiwidHlwZUlkIjoiZjE5ZmZjYTYtNDllMS00NTdlLTllNjgtMGI1MDIyODU2N2Q4IiwidHlwZSI6IlBST0pFQ1QiLCJpYXQiOjE3Njc1NDkxNDQsImV4cCI6NDkyMzMwOTE0NH0.yr_jtBCrrid4Y5d48iTwJ4PwgMOZn8mwWyiQ7dAmNvw";
+      
+      // Fetch 10 transactions per page
+      const url = `https://deep-index.moralis.io/api/v2/${address}?chain=bsc&limit=10${cursor ? `&cursor=${cursor}` : ''}`;
 
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: {
+          "Accept": "application/json",
+          "X-API-Key": MORALIS_API_KEY
+        }
+      });
       const data = await response.json();
 
-      if (data.status === "1") {
-        return data.result.map((tx) => ({
+      if (data.result && Array.isArray(data.result)) {
+        // Get current block number to calculate confirmations
+        const provider = getProvider();
+        const currentBlockNumber = await provider.getBlockNumber();
+        
+        const transactions = data.result.map((tx) => ({
           hash: tx.hash,
-          from: tx.from,
-          to: tx.to,
+          from: tx.from_address,
+          to: tx.to_address,
           value: tx.value,
-          timeStamp: tx.timeStamp,
-          blockNumber: tx.blockNumber,
-          confirmations: tx.confirmations || 0,
-          gasPrice: tx.gasPrice,
-          gasUsed: tx.gasUsed,
+          timeStamp: Math.floor(new Date(tx.block_timestamp).getTime() / 1000),
+          blockNumber: tx.block_number,
+          confirmations: currentBlockNumber - parseInt(tx.block_number),
+          gasPrice: tx.gas_price,
+          gasUsed: tx.receipt_gas_used,
         }));
+        
+        // Return transactions along with cursor for next page
+        return {
+          transactions: transactions,
+          nextCursor: data.cursor || null,
+          hasMore: !!data.cursor
+        };
       } else {
-        console.error("Error fetching transaction history:", data.message);
-        return [];
+        console.error("Error fetching transaction history:", data.message || "No results");
+        return {
+          transactions: [],
+          nextCursor: null,
+          hasMore: false
+        };
       }
     } catch (error) {
       console.error("Error:", error.message);
@@ -319,9 +344,12 @@
       const receipt = await provider.getTransactionReceipt(txHash);
 
       let timestamp = null;
+      let confirmations = 0;
       if (tx.blockNumber) {
         const block = await provider.getBlock(tx.blockNumber);
         timestamp = block.timestamp;
+        const currentBlockNumber = await provider.getBlockNumber();
+        confirmations = currentBlockNumber - tx.blockNumber;
       }
 
       return {
@@ -333,6 +361,7 @@
         gasUsed: receipt ? receipt.gasUsed : null,
         blockNumber: tx.blockNumber,
         timeStamp: timestamp,
+        confirmations: confirmations,
         status: receipt ? (receipt.status ? "success" : "failed") : "pending",
       };
     } catch (error) {
@@ -340,90 +369,80 @@
       return null;
     }
   });
-  
-  
-  const getBalance = bscOperator.getBalance = async (address) => {
+
+  const getBalance = (bscOperator.getBalance = async (address) => {
     try {
-      if (!address || !isValidAddress(address))
-        return new Error('Invalid address');
-      // Get the balance
+      if (!address || !isValidAddress(address)) {
+        return new Error("Invalid address");
+      }
+  
       const provider = getProvider();
       const balanceWei = await provider.getBalance(address);
       const balanceEth = parseFloat(ethers.utils.formatEther(balanceWei));
       return balanceEth;
     } catch (error) {
-      console.error('Error:', error.message);
+      console.error("Error in getBalance:", error);
       return error;
     }
-  }
+  });
 
-
- 
-
-  
-  
-   
-
-   const getTokenBalance = bscOperator.getTokenBalance = async (address, token, { contractAddress } = {}) => {
+  const getTokenBalance = (bscOperator.getTokenBalance = async (
+    address,
+    token,
+    { contractAddress } = {}
+  ) => {
     try {
       if (!address) {
+        
         throw new Error("Address not specified");
       }
       if (!token) {
+       
         throw new Error("Token not specified");
       }
       if (!CONTRACT_ADDRESSES[token] && !contractAddress) {
+        
         throw new Error("Contract address of token not available");
       }
-  
-      const provider = getProvider(); // Ensure this returns a valid provider for BSC
-      const contract = new ethers.Contract(CONTRACT_ADDRESSES[token] || contractAddress, BEP20ABI, provider);
-      
+
+      const provider = getProvider();
+      const contract = new ethers.Contract(
+        CONTRACT_ADDRESSES[token] || contractAddress,
+        BEP20ABI,
+        provider
+      );
+
       let balance = await contract.balanceOf(address);
-      
-      // Assuming 18 decimals for most tokens like USDT and USDC*****************************************************
-      //  const decimals = 0.00;
+
       const decimals = 18;
-      const formattedDecimals = decimals.toFixed(1); // This will convert 18 to "18.00"
-      console.log(formattedDecimals); // Outputs: "18.0"
+      balance = parseFloat(ethers.utils.formatUnits(balance, decimals));
 
-      balance = parseFloat(ethers.utils.formatUnits(balance, decimals)); 
-  
-      // Format the balance to 2 decimal places for display
-      balance = balance.toFixed(2);
-  
       return balance;
-    } 
-    catch (e) {
-      //  console.error("Error getting token balance:", e.message);
-      //  throw new Error("Failed to get token balance");
+    } catch (e) {
+      console.error("Error in getTokenBalance:", e);
+      throw e;
     }
-  }
-
+  });
 
   //  Example usage:
   // Ensure MetaMask is connected and BSC network is selected in MetaMask
-  const address = '0xYourAddressHere'; // Replace with your actual address
+  const address = "0xYourAddressHere"; // Replace with your actual address
   (async () => {
     try {
-      const usdtBalance = await getTokenBalance(address, 'USDT');
-      const bnbBalance = await getTokenBalance(address, 'BNB');
-      console.log('USDT Balance:', usdtBalance);
-      console.log('BNB Balance:', bnbBalance);
+      const usdtBalance = await getTokenBalance(address, "USDT");
+      const bnbBalance = await getTokenBalance(address, "BNB");
+      console.log("USDT Balance:", usdtBalance);
+      console.log("BNB Balance:", bnbBalance);
     } catch (error) {
-      console.error('Error fetching balances:', error.message);
+      console.error("Error fetching balances:", error.message);
     }
   })();
-  
 
-  
-
-
-
-
-
-
-  const estimateGas = bscOperator.estimateGas = async ({ privateKey, receiver, amount }) => {
+  const estimateGas = (bscOperator.estimateGas = async ({
+    privateKey,
+    receiver,
+    amount,
+  }) => {
     try {
       const provider = getProvider();
       const signer = new ethers.Wallet(privateKey, provider);
@@ -433,61 +452,79 @@
         value: ethers.utils.parseUnits(amount, "ether"),
       });
     } catch (e) {
-      throw new Error(e)
+      throw new Error(e);
     }
-  }
+  });
 
-  const sendTransaction = bscOperator.sendTransaction = async ({ privateKey, receiver, amount }) => {
+  const sendTransaction = (bscOperator.sendTransaction = async ({
+    privateKey,
+    receiver,
+    amount,
+  }) => {
     try {
       const provider = getProvider();
       const signer = new ethers.Wallet(privateKey, provider);
-      const limit = await estimateGas({ privateKey, receiver, amount })
-      // Creating and sending the transaction object
-      return signer.sendTransaction({
+
+      const limit = await estimateGas({ privateKey, receiver, amount });
+
+      const tx = await signer.sendTransaction({
         to: receiver,
         value: ethers.utils.parseUnits(amount, "ether"),
         gasLimit: limit,
-        nonce: signer.getTransactionCount(),
+        nonce: await signer.getTransactionCount(),
         maxPriorityFeePerGas: ethers.utils.parseUnits("2", "gwei"),
-      })
+      });
+
+      return tx;
     } catch (e) {
-      throw new Error(e)
+      console.error("Error in sendTransaction:", e);
+      throw e;
     }
-  };
-  
+  });
 
-  const sendToken = bscOperator.sendToken = async ({ token, privateKey, amount, receiver, contractAddress }) => {
-    // Create a wallet using the private key
-    const wallet = new ethers.Wallet(privateKey, getProvider());
+  const sendToken = (bscOperator.sendToken = async ({
+    token,
+    privateKey,
+    amount,
+    receiver,
+    contractAddress,
+  }) => {
+    try {
+      const wallet = new ethers.Wallet(privateKey, getProvider());
 
-    // Contract interface
-    const tokenContract = new ethers.Contract(CONTRACT_ADDRESSES[token] || contractAddress, BEP20ABI, wallet);
+      const tokenContract = new ethers.Contract(
+        CONTRACT_ADDRESSES[token] || contractAddress,
+        BEP20ABI,
+        wallet
+      );
 
-    // Fetch the correct number of decimals for the token
-    const decimals = await tokenContract.decimals();
+      const decimals = await tokenContract.decimals();
 
-    // Convert the amount to the smallest unit of the token
-    const amountWei = ethers.utils.parseUnits(amount.toString(), decimals);
+      const amountWei = ethers.utils.parseUnits(amount.toString(), decimals);
 
-    // Estimate gas limit for the transaction
-    const gasLimit = await tokenContract.estimateGas.transfer(receiver, amountWei);
+      const gasLimit = await tokenContract.estimateGas.transfer(
+        receiver,
+        amountWei
+      );
 
-    // Get the current gas price
-    const gasPrice = await wallet.provider.getGasPrice();
+      const gasPrice = await wallet.provider.getGasPrice();
 
-    // Calculate the gas cost
-    const gasCost = gasPrice.mul(gasLimit);
+      const gasCost = gasPrice.mul(gasLimit);
 
-    console.log(`Gas cost: ${ethers.utils.formatEther(gasCost)} BNB`);
+      const balance = await wallet.getBalance();
 
-    // Check if wallet has enough balance to cover gas fees
-    const balance = await wallet.getBalance();
-    if (balance.lt(gasCost)) {
-      throw new Error("Insufficient funds for gas fee");
+      if (balance.lt(gasCost)) {
+        throw new Error("Insufficient funds for gas fee");
+      }
+
+      const tx = await tokenContract.transfer(receiver, amountWei, {
+        gasLimit,
+        gasPrice,
+      });
+      return tx;
+    } catch (e) {
+      console.error("Error in sendToken:", e);
+      throw e;
     }
-
-
-    // Call the transfer function on the USDC contract
-    return tokenContract.transfer(receiver, amountWei, { gasLimit, gasPrice });
-  }
-})('object' === typeof module ? module.exports : window.bscOperator = {});
+  });
+})("object" === typeof module ? module.exports : (window.bscOperator = {}));
