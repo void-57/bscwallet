@@ -424,19 +424,6 @@
     }
   });
 
-  //  Example usage:
-  // Ensure MetaMask is connected and BSC network is selected in MetaMask
-  const address = "0xYourAddressHere"; // Replace with your actual address
-  (async () => {
-    try {
-      const usdtBalance = await getTokenBalance(address, "USDT");
-      const bnbBalance = await getTokenBalance(address, "BNB");
-      console.log("USDT Balance:", usdtBalance);
-      console.log("BNB Balance:", bnbBalance);
-    } catch (error) {
-      console.error("Error fetching balances:", error.message);
-    }
-  })();
 
   const estimateGas = (bscOperator.estimateGas = async ({
     privateKey,
