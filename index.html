@@ -3056,8 +3056,8 @@
         getRef("send_tx_button").textContent = `Send ${asset.toUpperCase()}`;
       }
       async function sendTx() {
-        const receiver = getRef("receiver_input").value.trim();
-        const amount = getRef("amount_input").value.trim();
+        const receiver = getRef("send_tx_form").querySelector(".receiver-address").value.trim();
+        const amount = getRef("send_tx_form").querySelector(".receiver-amount").value.trim();
         const asset = getRef("asset_selector").value;
 
         try {
